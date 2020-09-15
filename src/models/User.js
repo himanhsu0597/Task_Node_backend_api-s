@@ -48,7 +48,7 @@ const userSchema = new mongoose.Schema({
     }]
 })
 
-//works on object or instances
+//mrthods works on object or instances
 userSchema.methods.generateAuthToken= async function()
 {
     const user= this;
@@ -59,6 +59,17 @@ userSchema.methods.generateAuthToken= async function()
 
     return token;
 }
+
+userSchema.methods.toJSON=function(){
+    const user=this;
+    const userObject=user.toObject()
+
+    delete userObject.password;
+    delete userObject.tokens;
+
+    return userObject;
+}
+
 
 //statics works on Schema level rather class level
 userSchema.statics.findByCredentials = async (email, password) => {
