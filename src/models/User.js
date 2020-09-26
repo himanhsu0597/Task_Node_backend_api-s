@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
 const jwt=require("jsonwebtoken")
+const Task=require('./Task')
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -46,9 +47,18 @@ const userSchema = new mongoose.Schema({
             required:true
         }
     }]
+},{
+timestamps:true
 })
 
-//mrthods works on object or instances
+userSchema.virtual('tasks',{
+    ref:'Task',
+    localField:'_id',
+    foreignField:'owner'
+})
+
+
+//methods works on object or instances
 userSchema.methods.generateAuthToken= async function()
 {
     const user= this;
@@ -84,6 +94,13 @@ userSchema.statics.findByCredentials = async (email, password) => {
 
     return user
 }
+//Delete user Tasks when user is removed
+userSchema.pre('remove', async function (next){
+    const user=this;
+    await Task.deleteMany({owner:user._id})
+    next();
+} )
+
 
 // Hash the plain text password before saving
 userSchema.pre('save', async function (next) {

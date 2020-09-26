@@ -83,16 +83,13 @@ router.get('/users/me',auth ,async (req, res) => {
 
 
 
-router.delete('/users/:id', async (req, res) => {
+router.delete('/users/me',auth, async (req, res) => {
 
-    const _id=req.params.id;
+
 
     try{
-        const user= await User.findByIdAndDelete(_id);
-        if(!user){
-            res.status(404).send();
-        }
-        res.send(user);
+        await req.user.remove();
+        res.send(req.user);
 
     }catch (e) {
         res.status(500).send(e)
@@ -100,9 +97,8 @@ router.delete('/users/:id', async (req, res) => {
 })
 
 
-router.patch('/users/:id', async (req, res) => {
+router.patch('/users/me',auth, async (req, res) => {
 
-    const _id=req.params.id;
     const keys=Object.keys(req.body);
     const arr=['name','email','password','age'];
 
@@ -115,17 +111,15 @@ router.patch('/users/:id', async (req, res) => {
     }
 
     try{
-        const user= await User.findById(_id);
+
         keys.map((key)=>{
-            user[key]=req.body[key];
+            req.user[key]=req.body[key];
         })
 
-        await user.save();
+        await req.user.save();
 
-        if(!user){
-            res.status(404).send();
-        }
-        res.send(user);
+
+        res.send(req.user);
 
     }catch (e) {
         res.status(500).send(e)
